@@ -1,0 +1,16 @@
+{
+  "Debug": false,
+  "Retries": 0,
+  "Routes": [
+    {
+      "ServeNodes": [
+        "socks5://:sport"
+      ]
+    },
+    {
+      "ServeNodes": [
+        "http://:hport"
+      ]
+    }
+  ]
+}
