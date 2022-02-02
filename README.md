@@ -1,0 +1,2 @@
+# net
+for cornell wifi
