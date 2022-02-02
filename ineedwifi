@@ -1,0 +1,82 @@
+#!/bin/bash
+
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NOCOLOR='\033[0m'
+
+
+if ! test -d ~/.proxy-help 
+then
+echo -e "${RED}missing files${NOCOLOR}"
+exit
+fi
+
+cd ~/.proxy-help/
+pname=$(ls ~/.proxy-help | grep sshdd)
+
+if [ ${#pname} -lt 3 ]
+then
+echo -e "${RED}missing files${NOCOLOR}"
+exit
+fi
+
+if ! test -f ~/.proxy-help/conf.json
+then
+# else
+echo -e "${RED}missing files${NOCOLOR}"
+exit
+fi
+
+s5port=$(cat ~/.proxy-help/conf.json | grep "socks5://:" | grep -o "[3-6][0-9][0-9][0-9][0-9]")
+htport=$(cat ~/.proxy-help/conf.json | grep "http://:" | grep -o "[3-6][0-9][0-9][0-9][0-9]")
+
+if [ "$1" = "show" ]
+then
+  addr=$(curl -s ifconfig.me)
+  echo -e "connection address: ${GREEN}${addr}${NOCOLOR}"
+  echo -e "socks5 port: ${GREEN}${s5port}${NOCOLOR}"
+  echo -e "http port: ${GREEN}${htport}${NOCOLOR}"
+
+elif [ "$1" = "start" ]
+then
+current=$(ps -a|grep "${pname}")
+if [ ${#current} < 5 ]
+then
+echo -e "${GREEN}start proxy${NOCOLOR}"
+nohup ./${pname} -C conf.json >/dev/null 2>&1 &
+fi
+
+elif [ "$1" = "restart" ]
+then
+current=$(ps -a|grep "${pname}")
+if [ ${#current} > 5 ]
+then
+echo -e "${GREEN}stop proxy${NOCOLOR}"
+pkill ${pname}
+fi
+echo -e "${GREEN}start proxy${NOCOLOR}"
+nohup ./${pname} -C conf.json >/dev/null 2>&1 &
+
+elif [ "$1" = "stop" ]
+then
+current=$(ps -a|grep "${pname}")
+if [ ${#current} > 5 ]
+then
+echo -e "${GREEN}stop proxy${NOCOLOR}"
+pkill ${pname}
+fi
+
+else
+echo -e "${GREEN}restart proxy${NOCOLOR}"
+current=$(ps -a|grep "${pname}")
+if [ ${#current} > 5 ]
+then
+pkill ${pname}
+fi
+nohup ./${pname} -C conf.json >/dev/null 2>&1 &
+addr=$(curl -s ifconfig.me)
+echo -e "connection address: ${GREEN}${addr}${NOCOLOR}"
+echo -e "socks5 port: ${GREEN}${s5port}${NOCOLOR}"
+echo -e "http port: ${GREEN}${htport}${NOCOLOR}"
+fi 
